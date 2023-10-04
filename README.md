@@ -2,7 +2,7 @@
 
 This sample application allows you to ask natural language questions of any PDF document you upload. It combines the text generation and analysis capabilities of an LLM with a vector search of the document content. The solution uses serverless services such as [Amazon Bedrock](https://aws.amazon.com/bedrock/) to access foundational models, [AWS Lambda](https://aws.amazon.com/lambda/) to run [LangChain](https://github.com/hwchase17/langchain), and [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) for conversational memory.
 
-See the [accompanying blog post on the AWS Serverless Blog](https://aws.amazon.com/blogs/compute/tag/serverless/) for a detailed description and follow the deployment instructions below to get started.
+See the [accompanying blog post on the AWS Serverless Blog](https://aws.amazon.com/blogs/compute/building-a-serverless-document-chat-with-aws-lambda-and-amazon-bedrock/) for a detailed description and follow the deployment instructions below to get started.
 
 <p float="left">
   <img src="preview-1.png" width="49%" />
