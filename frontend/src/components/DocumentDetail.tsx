@@ -23,7 +23,7 @@ const DocumentDetail: React.FC<Document> = (document: Document) => {
         </div>
         <div className="inline-flex items-center">
           <CircleStackIcon className="w-4 h-4 mr-2" />
-          {filesize(document.filesize).toString()}
+          {filesize(Number(document.filesize)).toString()}
         </div>
         <div className="inline-flex items-center">
           <ClockIcon className="w-4 h-4 mr-2" />

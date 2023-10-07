@@ -89,7 +89,9 @@ const DocumentUploader: React.FC = () => {
                 <DocumentIcon className="w-14 h-14 text-gray-400" />
                 <div className="flex flex-col ml-2">
                   <p className="font-bold mb-1">{selectedFile?.name}</p>
-                  <p>{filesize(selectedFile?.size).toString()}</p>
+                  <p>
+                    {filesize(selectedFile ? selectedFile.size : 0).toString()}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-row items-center">
