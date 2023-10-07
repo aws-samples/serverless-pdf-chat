@@ -3,6 +3,7 @@ from datetime import datetime
 import boto3
 import PyPDF2
 import shortuuid
+import urllib
 from aws_lambda_powertools import Logger
 
 DOCUMENT_TABLE = os.environ["DOCUMENT_TABLE"]
@@ -21,7 +22,7 @@ logger = Logger()
 
 @logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context):
-    key = event["Records"][0]["s3"]["object"]["key"]
+    key = urllib.parse.unquote_plus(event["Records"][0]["s3"]["object"]["key"])
     split = key.split("/")
     user_id = split[0]
     file_name = split[1]
