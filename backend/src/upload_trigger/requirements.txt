@@ -1,4 +1,4 @@
 boto3==1.28.57
 botocore==1.31.57
 PyPDF2==3.0.1
-shortuuid===1.0.11
+shortuuid==1.0.11
