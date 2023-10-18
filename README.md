@@ -182,7 +182,13 @@ To set up Amplify Hosting:
    github_pat_T2wyo------------------------------------------------------------------------rs0Pp
    ```
 
-1. Run the following command in the `backend` directory to edit the AWS SAM deploy configuration:
+1. Run the following command in the `backend` directory to prepare the application for deployment:
+
+   ```bash
+   sam build
+   ```
+
+1. Next, to edit the AWS SAM deploy configuration, run the following command:
 
    ```bash
    sam deploy --guided
