@@ -209,6 +209,30 @@ AWS SAM will now deploy the React frontend with Amplify Hosting. Navigate to the
    ```bash
    sam delete
    ```
+## Troubleshooting
+
+If you are experiencing issues when running the [`sam build`](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-build.html) command, try setting the `--use-container` flag (requires Docker):
+
+```bash
+sam build --use-container
+```
+
+If you are still experiencing issues despite using `--use-container`, try switching the AWS Lambda functions from `arm64` to `x86_64` in the `backend/template.yaml` (as well as switching to the x_86_64 version to Powertools):
+
+```yaml
+Globals:
+  Function:
+    Runtime: python3.11
+    Handler: main.lambda_handler
+    Architectures:
+      - x86_64
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+    Layers:
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:51
+```
 
 ## Security
 
