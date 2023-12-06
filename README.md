@@ -217,7 +217,7 @@ If you are experiencing issues when running the [`sam build`](https://docs.aws.a
 sam build --use-container
 ```
 
-If you are still experiencing issues despite using `--use-container`, try switching the AWS Lambda functions from `arm64` to `x86_64` in the `backend/template.yaml` (as well as switching to the x_86_64 version to Powertools):
+If you are still experiencing issues despite using `--use-container`, try switching the AWS Lambda functions from `arm64` to `x86_64` in the `backend/template.yaml` (as well as switching to the `x_86_64` version of Powertools):
 
 ```yaml
 Globals:
