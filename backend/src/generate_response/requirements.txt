@@ -1,6 +1,9 @@
-boto3==1.28.57
-botocore==1.31.57
-faiss-cpu==1.7.4
-BeautifulSoup4==4.12.2
-langchain==0.1.11
+boto3
+botocore
+faiss-cpu
+BeautifulSoup4
+langchain
+langchain-aws
+langchain-core
+langchain-community
 urllib3
