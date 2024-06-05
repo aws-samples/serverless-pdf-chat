@@ -52,7 +52,8 @@ def create_memory(conversation_id):
     )
     return memory
 
-def handle_claude_v3(faiss_index, memory, human_input):
+# handler(faiss_index, memory, human_input, bedrock_runtime)
+def handle_claude_v3(faiss_index, memory, human_input, bedrock_runtime):
 
     chat = BedrockChat(
         model_id=MODEL_ID,
@@ -69,9 +70,9 @@ def handle_claude_v3(faiss_index, memory, human_input):
 
     response = chain.invoke({"question": human_input})
 
-    print(f"{MODEL_ID} response: {response}")
     return response
 
+# handler(faiss_index, memory, human_input, bedrock_runtime)
 def handle_claude_v2(faiss_index, memory, human_input, bedrock_runtime):
 
     llm = Bedrock(
@@ -87,7 +88,6 @@ def handle_claude_v2(faiss_index, memory, human_input, bedrock_runtime):
 
     response = qa({"question": human_input})
 
-    print(f"{MODEL_ID} response: {response}")
     return response
 
 model_handlers = {
@@ -116,10 +116,11 @@ def lambda_handler(event, context):
     handler = model_handlers.get(MODEL_ID)
     if handler:
         response = handler(faiss_index, memory, human_input, bedrock_runtime)
+        print(f"{MODEL_ID} -\nPrompt: {human_input}\n\nResponse: {response['answer']}")
     else:
         raise ValueError(f"Unsupported MODEL_ID: {MODEL_ID}")
 
-    logger.info(str(response))
+    logger.info(str(response['answer']))
 
     return {
         "statusCode": 200,
@@ -129,5 +130,5 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
         },
-        "body": json.dumps(response),
+        "body": json.dumps(response['answer']),
     }
