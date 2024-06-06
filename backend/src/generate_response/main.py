@@ -2,7 +2,6 @@ import os
 import json
 import boto3
 from aws_lambda_powertools import Logger
-from langchain.llms.bedrock import Bedrock
 from langchain_community.chat_models import BedrockChat
 from langchain.memory.chat_message_histories import DynamoDBChatMessageHistory
 from langchain.memory import ConversationBufferMemory
