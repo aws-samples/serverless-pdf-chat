@@ -62,7 +62,7 @@ By default, this application uses **Titan Embeddings G1 - Text** to generate emb
 
 To select your Bedrock model, specify the `ModelId` parameter during the AWS SAM deployment, such as `anthropic.claude-3-sonnet-20240229-v1:0`. See [Amazon Bedrock model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for a complete list.
 
-The `ModelId` parameter is used in the GenerateResponseFunction Lambda function of your AWS SAM template to instantiate [LangChain BedrockChat](https://js.langchain.com/v0.1/docs/integrations/chat/bedrock/) and [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html) objects, providing efficient retrieval of relevant context from large datasets to enable the Bedrock model-generated response.
+The `ModelId` parameter is used in the GenerateResponseFunction Lambda function of your AWS SAM template to instantiate [LangChain BedrockChat](https://js.langchain.com/v0.1/docs/integrations/chat/bedrock/) and [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html) objects, providing efficient retrieval of relevant context from large PDF datasets to enable the Bedrock model-generated response.
 
 ```python
 def bedrock_chain(faiss_index, memory, human_input, bedrock_runtime):
@@ -118,9 +118,9 @@ To set up Amplify Hosting:
 
 1. For **Frontend**, specify the environment ("local", "amplify") for the frontend of the application.
 
-1. For Amplify-hosted applications, specify the URL of the forked Git repository containing the application code.
+1. If you selected "amplify", specify the URL of the forked Git repository containing the application code.
 
-1. Specify the Amazon Bedrock model ID. For example, "anthropic.claude-3-sonnet-20240229-v1:0"
+1. Specify the Amazon Bedrock model ID. For example, `anthropic.claude-3-sonnet-20240229-v1:0`.
 
 1. For the remaining options, keep the defaults by pressing the enter key.
 
@@ -145,7 +145,7 @@ Value               https://abcd1234.execute-api.us-east-1.amazonaws.com/dev/
 -------------------------------------------------------------------------------
 ```
 
-If you selected to deploy to Amplify, AWS SAM will deploy the React frontend with Amplify Hosting. Navigate to the Amplify console to check the build status. If the build does not start automatically, trigger it through the Amplify console.
+If you selected to deploy the React frontend using Amplify Hosting, navigate to the Amplify console to check the build status. If the build does not start automatically, trigger it through the Amplify console.
 
 If you selected to run the React frontend locally and connect to the deployed resources in AWS, you will use the CloudFormation stack outputs in the following section.
 
