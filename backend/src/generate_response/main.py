@@ -52,8 +52,7 @@ def create_memory(conversation_id):
     )
     return memory
 
-# handler(faiss_index, memory, human_input, bedrock_runtime)
-def handle_claude_v3(faiss_index, memory, human_input, bedrock_runtime):
+def bedrock_chain(faiss_index, memory, human_input, bedrock_runtime):
 
     chat = BedrockChat(
         model_id=MODEL_ID,
@@ -72,31 +71,6 @@ def handle_claude_v3(faiss_index, memory, human_input, bedrock_runtime):
 
     return response
 
-# handler(faiss_index, memory, human_input, bedrock_runtime)
-def handle_claude_v2(faiss_index, memory, human_input, bedrock_runtime):
-
-    llm = Bedrock(
-        model_id=MODEL_ID, client=bedrock_runtime, region_name="us-east-1"
-    )
-    
-    qa = ConversationalRetrievalChain.from_llm(
-        llm=llm,
-        retriever=faiss_index.as_retriever(),
-        memory=memory,
-        return_source_documents=True,
-    )
-
-    response = qa({"question": human_input})
-
-    return response
-
-model_handlers = {
-    "anthropic.claude-3-sonnet-20240229-v1:0": handle_claude_v3,
-    "anthropic.claude-3-haiku-20240307-v1:0": handle_claude_v3,
-    "anthropic.claude-v2": handle_claude_v2,
-    "anthropic.claude-v2:1": handle_claude_v2,
-}
-
 @logger.inject_lambda_context(log_event=True)
 def lambda_handler(event, context):
     event_body = json.loads(event["body"])
@@ -113,12 +87,11 @@ def lambda_handler(event, context):
         region_name="us-east-1",
     )
 
-    handler = model_handlers.get(MODEL_ID)
-    if handler:
-        response = handler(faiss_index, memory, human_input, bedrock_runtime)
+    response = bedrock_chain(faiss_index, memory, human_input, bedrock_runtime)
+    if response:
         print(f"{MODEL_ID} -\nPrompt: {human_input}\n\nResponse: {response['answer']}")
     else:
-        raise ValueError(f"Unsupported MODEL_ID: {MODEL_ID}")
+        raise ValueError(f"Unsupported model ID: {MODEL_ID}")
 
     logger.info(str(response['answer']))
 

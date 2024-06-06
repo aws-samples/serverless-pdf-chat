@@ -26,16 +26,10 @@ Parameters:
       - local
       - amplify
   Repository:
-    Default: "https://github.com/kyleblocksom/claude-v3-serverless-pdf-chat.git"
     Type: String
   ModelId:
     Default: "anthropic.claude-3-sonnet-20240229-v1:0"
     Type: String
-    AllowedValues:
-      - "anthropic.claude-v2"
-      - "anthropic.claude-v2:1"
-      - "anthropic.claude-3-haiku-20240307-v1:0"
-      - "anthropic.claude-3-sonnet-20240229-v1:0"
 
 Conditions:
   DeployToAmplifyHosting: !Equals
@@ -377,7 +371,7 @@ Resources:
                 paths:
                   - node_modules/**/*
             appRoot: frontend
-      AccessToken: "{{resolve:secretsmanager:claude-v3-serverless-pdf-chat-github-token}}"
+      AccessToken: "{{resolve:secretsmanager:serverless-pdf-chat-github-token}}"
       EnvironmentVariables:
         - Name: AMPLIFY_MONOREPO_APP_ROOT
           Value: frontend
