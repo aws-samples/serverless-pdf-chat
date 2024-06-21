@@ -1,6 +1,6 @@
 # Serverless document chat application
 
-This sample application allows you to ask natural language questions of any PDF document you upload. It combines the text generation and analysis capabilities of an LLM with a vector search of the document content. The solution uses serverless services such as [Amazon Bedrock](https://aws.amazon.com/bedrock/) to access foundational models, [AWS Lambda](https://aws.amazon.com/lambda/) to run [LangChain](https://github.com/hwchase17/langchain), and [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) for conversational memory.
+This sample application allows you to ask natural language questions of any PDF document you upload. It combines the text generation and analysis capabilities of an LLM with a vector search of the document content. The solution uses serverless services such as [Amazon Bedrock](https://aws.amazon.com/bedrock/) to access foundational models, [AWS Lambda](https://aws.amazon.com/lambda/) to run [LangChain](https://github.com/langchain-ai/langchain), and [Amazon DynamoDB](https://aws.amazon.com/dynamodb/) for conversational memory.
 
 See the [accompanying blog post on the AWS Serverless Blog](https://aws.amazon.com/blogs/compute/building-a-serverless-document-chat-with-aws-lambda-and-amazon-bedrock/) for a detailed description and follow the deployment instructions below to get started.
 
@@ -30,7 +30,7 @@ See the [accompanying blog post on the AWS Serverless Blog](https://aws.amazon.c
 
 ![Serverless PDF Chat architecture](architecture.png "Serverless PDF Chat architecture")
 
-1. A user uploads a PDF document into an [Amazon S3](https://aws.amazon.com/s3/) bucket through a static web application frontend.
+1. A user uploads a PDF document into an [Amazon Simple Storage Service](https://aws.amazon.com/s3/) (S3) bucket through a static web application frontend.
 1. This upload triggers a metadata extraction and document embedding process. The process converts the text in the document into vectors. The vectors are loaded into a vector index and stored in S3 for later use.
 1. When a user chats with a PDF document and sends a prompt to the backend, a Lambda function retrieves the index from S3 and searches for information related to the prompt.
 1. A LLM then uses the results of this vector search, previous messages in the conversation, and its general-purpose capabilities to formulate a response to the user.
@@ -52,40 +52,52 @@ git clone https://github.com/aws-samples/serverless-pdf-chat.git
 
 ### Amazon Bedrock setup
 
-This application can be used with a variety of LLMs via Amazon Bedrock. See [Supported models in Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-service.html#models-supported) for a complete list.
+This application can be used with a variety of Amazon Bedrock models. See [Supported models in Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-service.html#models-supported) for a complete list.
 
-By default, this application uses **Titan Embeddings G1 - Text** to generate embeddings and **Anthropic's Claude v2** model for responses.
+By default, this application uses **Titan Embeddings G1 - Text** to generate embeddings and **Anthropic Claude v3 Sonnet** for responses.
 
-> **Important**
+> **Important -**
 > Before you can use these models with this application, **you must request access in the Amazon Bedrock console**. See the [Model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) section of the Bedrock User Guide for detailed instructions.
 > By default, this application is configured to use Amazon Bedrock in the `us-east-1` Region, make sure you request model access in that Region (this does not have to be the same Region that you deploy this stack to).
 
-If you want to change the default models or Bedrock Region, edit `Bedrock` and `BedrockEmbeddings` in `backend/src/generate_response/main.py` and `backend/src/generate_embeddings/main.py`:
+To select your Bedrock model, specify the `ModelId` parameter during the AWS SAM deployment, such as `anthropic.claude-3-sonnet-20240229-v1:0`. See [Amazon Bedrock model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for a complete list.
+
+The `ModelId` parameter is used in the GenerateResponseFunction Lambda function of your AWS SAM template to instantiate [LangChain BedrockChat](https://js.langchain.com/v0.1/docs/integrations/chat/bedrock/) and [ConversationalRetrievalChain](https://api.python.langchain.com/en/latest/chains/langchain.chains.conversational_retrieval.base.ConversationalRetrievalChain.html) objects, providing efficient retrieval of relevant context from large PDF datasets to enable the Bedrock model-generated response.
 
 ```python
-Bedrock(
-   model_id="anthropic.claude-v2", #adjust to use different model
-   region_name="us-east-1", #adjust if not using us-east-1
-)
+def bedrock_chain(faiss_index, memory, human_input, bedrock_runtime):
+
+    chat = BedrockChat(
+        model_id=MODEL_ID,
+        model_kwargs={'temperature': 0.0}
+    )
+
+    chain = ConversationalRetrievalChain.from_llm(
+        llm=chat,
+        chain_type="stuff",
+        retriever=faiss_index.as_retriever(),
+        memory=memory,
+        return_source_documents=True,
+    )
+
+    response = chain.invoke({"question": human_input})
+
+    return response
 ```
 
-If you select models other than the default, you must also adjust the IAM permissions of the `GenerateEmbeddingsFunction` and `GenerateResponseFunction` resources in the AWS SAM template:
+### Deploy the frontend with AWS Amplify Hosting
 
-```yaml
-GenerateResponseFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-    # other properties
-    Policies:
-      # other policies
-      - Statement:
-          - Sid: "BedrockScopedAccess"
-            Effect: "Allow"
-            Action: "bedrock:InvokeModel"
-            Resource:
-              - "arn:aws:bedrock:*::foundation-model/anthropic.claude-v2" # adjust with different model
-              - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v1" # adjust with different model
-```
+[AWS Amplify Hosting](https://aws.amazon.com/amplify/hosting/) enables a fully-managed deployment of the application's React frontend in an AWS-managed account using Amazon S3 and [Amazon CloudFront](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html). You can optionally run the React frontend locally by skipping to [Deploy the application with AWS SAM](#Deploy-the-application-with-AWS-SAM).
+
+To set up Amplify Hosting:
+
+1. Fork this GitHub repository and take note of your repository URL, for example `https://github.com/user/serverless-pdf-chat/`.
+1. Create a GitHub fine-grained access token for the new repository by following [this guide](https://docs.aws.amazon.com/amplify/latest/userguide/setting-up-GitHub-access.html). For the **Repository permissions**, select **Read and write** for **Content** and **Webhooks**.
+1. Create a new secret called `serverless-pdf-chat-github-token` in AWS Secrets Manager and input your fine-grained access token as plaintext. Select the **Plaintext** tab and confirm your secret looks like this:
+
+   ```json
+   github_pat_T2wyo------------------------------------------------------------------------rs0Pp
+   ```
 
 ### Deploy the application with AWS SAM
 
@@ -103,6 +115,12 @@ GenerateResponseFunction:
    ```
 
 1. For **Stack Name**, choose `serverless-pdf-chat`.
+
+1. For **Frontend**, specify the environment ("local", "amplify") for the frontend of the application.
+
+1. If you selected "amplify", specify the URL of the forked Git repository containing the application code.
+
+1. Specify the Amazon Bedrock model ID. For example, `anthropic.claude-3-sonnet-20240229-v1:0`.
 
 1. For the remaining options, keep the defaults by pressing the enter key.
 
@@ -127,9 +145,11 @@ Value               https://abcd1234.execute-api.us-east-1.amazonaws.com/dev/
 -------------------------------------------------------------------------------
 ```
 
-You can find the same outputs in the `Outputs` tab of the `serverless-pdf-chat` stack in the AWS CloudFormation console. In the next section, you will use these outputs to run the React frontend locally and connect to the deployed resources in AWS.
+If you selected to deploy the React frontend using Amplify Hosting, navigate to the Amplify console to check the build status. If the build does not start automatically, trigger it through the Amplify console.
 
-### Run the React frontend locally
+If you selected to run the React frontend locally and connect to the deployed resources in AWS, you will use the CloudFormation stack outputs in the following section.
+
+### Optional: Run the React frontend locally
 
 Create a file named `.env.development` in the `frontend` directory. [Vite will use this file](https://vitejs.dev/guide/env-and-mode.html) to set up environment variables when we run the application locally.
 
@@ -154,9 +174,11 @@ Finally, to start the application locally, run the following command in the `fro
 npm run dev
 ```
 
-Vite will now start the application under `http://localhost:5173`. As the application uses Amazon Cognito for authentication, you will be greeted by a login screen. In the next step, you will create a user to access the application.
+Vite will now start the application under `http://localhost:5173`.
 
 ### Create a user in the Amazon Cognito user pool
+
+The application uses Amazon Cognito to authenticate users through a login screen. In this step, you will create a user to access the application.
 
 Perform the following steps to create a user in the Cognito user pool:
 
@@ -166,39 +188,7 @@ Perform the following steps to create a user in the Cognito user pool:
 1. Enter an email address and a password that adheres to the password requirements.
 1. Choose **Create user**.
 
-Change back to `http://localhost:5173` and log in with the new user's credentials.
-
-### Optional: Deploying the frontend with AWS Amplify Hosting
-
-You can optionally deploy the React frontend with [Amplify Hosting](https://aws.amazon.com/amplify/hosting/). Amplify Hosting enables a fully-managed deployment of the React frontend in an AWS-managed account using Amazon S3 and Amazon CloudFront.
-
-To set up Amplify Hosting:
-
-1. Fork this GitHub repository and take note of your repository URL, for example `https://github.com/user/serverless-pdf-chat/`.
-1. Create a GitHub fine-grained access token for the new repository by following [this guide](https://docs.aws.amazon.com/amplify/latest/userguide/setting-up-GitHub-access.html). For the **Repository permissions**, select **Read and write** for **Content** and **Webhooks**.
-1. Create a new secret called `serverless-pdf-chat-github-token` in AWS Secrets Manager and input your fine-grained access token as plaintext. Select the **Plaintext** tab and confirm your secret looks like this:
-
-   ```json
-   github_pat_T2wyo------------------------------------------------------------------------rs0Pp
-   ```
-
-1. Run the following command in the `backend` directory to prepare the application for deployment:
-
-   ```bash
-   sam build
-   ```
-
-1. Next, to edit the AWS SAM deploy configuration, run the following command:
-
-   ```bash
-   sam deploy --guided
-   ```
-
-1. This time, for **Parameter Frontend**, input **amplify**.
-1. For **Parameter Repository**, input the URL of your forked GitHub repository.
-1. Leave all other options unchanged by pressing the enter key.
-
-AWS SAM will now deploy the React frontend with Amplify Hosting. Navigate to the Amplify console to check the build status. If the build does not start automatically, trigger it via the Amplify console.
+Navigate back to your Amplify website URL or local host address to log in with the new user's credentials.
 
 ## Cleanup
 

@@ -20,12 +20,15 @@ Globals:
 
 Parameters:
   Frontend:
-    Default: local
+    Default: amplify
     Type: String
     AllowedValues:
       - local
       - amplify
   Repository:
+    Type: String
+  ModelId:
+    Default: "anthropic.claude-3-sonnet-20240229-v1:0"
     Type: String
 
 Conditions:
@@ -328,12 +331,13 @@ Resources:
               Effect: "Allow"
               Action: "bedrock:InvokeModel"
               Resource:
-                - "arn:aws:bedrock:*::foundation-model/anthropic.claude-v2"
+                - !Sub "arn:aws:bedrock:*::foundation-model/${ModelId}"
                 - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v1"
       Environment:
         Variables:
           MEMORY_TABLE: !Ref MemoryTable
           BUCKET: !Ref DocumentBucket
+          MODEL_ID: !Ref ModelId
       Events:
         Root:
           Type: Api
