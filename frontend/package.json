@@ -10,10 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@aws-amplify/ui-react": "^5.0.1",
+    "@aws-amplify/ui-react": "^5.3.1",
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^2.0.18",
-    "aws-amplify": "^5.3.12",
+    "aws-amplify": "^5.3.19",
     "date-fns": "^2.30.0",
     "filesize": "^10.0.7",
     "react": "^18.2.0",
