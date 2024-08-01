@@ -9,6 +9,7 @@ from langchain.vectorstores import FAISS
 
 DOCUMENT_TABLE = os.environ["DOCUMENT_TABLE"]
 BUCKET = os.environ["BUCKET"]
+EMBEDDING_MODEL_ID = os.environ["EMBEDDING_MODEL_ID"]
 
 s3 = boto3.client("s3")
 ddb = boto3.resource("dynamodb")
@@ -44,7 +45,7 @@ def lambda_handler(event, context):
     )
 
     embeddings = BedrockEmbeddings(
-        model_id="amazon.titan-embed-text-v1",
+        model_id=EMBEDDING_MODEL_ID,
         client=bedrock_runtime,
         region_name="us-east-1",
     )
