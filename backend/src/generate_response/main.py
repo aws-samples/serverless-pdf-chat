@@ -13,6 +13,7 @@ from langchain.chains import ConversationalRetrievalChain
 MEMORY_TABLE = os.environ["MEMORY_TABLE"]
 BUCKET = os.environ["BUCKET"]
 MODEL_ID = os.environ["MODEL_ID"]
+EMBEDDING_MODEL_ID = os.environ["EMBEDDING_MODEL_ID"]
 
 s3 = boto3.client("s3")
 logger = Logger()
@@ -25,7 +26,7 @@ def get_embeddings():
     )
 
     embeddings = BedrockEmbeddings(
-        model_id="amazon.titan-embed-text-v1",
+        model_id=EMBEDDING_MODEL_ID,
         client=bedrock_runtime,
         region_name="us-east-1",
     )
