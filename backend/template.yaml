@@ -351,6 +351,30 @@ Resources:
             Path: /{documentid}/{conversationid}
             Method: POST
 
+  DeleteDocumentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/delete_document/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemoryTable
+        - S3CrudPolicy:
+            BucketName: !Sub "${AWS::StackName}-${AWS::Region}-${AWS::AccountId}*"
+      Environment:
+        Variables:
+          DOCUMENT_TABLE: !Ref DocumentTable
+          MEMORY_TABLE: !Ref MemoryTable
+          BUCKET: !Sub "${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /doc/{documentid}
+            Method: DELETE
+
   AmplifyApp:
     Type: AWS::Amplify::App
     Condition: DeployToAmplifyHosting
