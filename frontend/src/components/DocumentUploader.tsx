@@ -9,7 +9,10 @@ import {
   ArrowLeftCircleIcon,
 } from "@heroicons/react/24/outline";
 
-const DocumentUploader: React.FC = () => {
+interface DocumentUploaderProps {
+  onDocumentUploaded?:() => void
+}
+const DocumentUploader: React.FC<DocumentUploaderProps> = ({onDocumentUploaded}) => {
   const [inputStatus, setInputStatus] = useState<string>("idle");
   const [buttonStatus, setButtonStatus] = useState<string>("ready");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -43,6 +46,7 @@ const DocumentUploader: React.FC = () => {
         headers: { "Content-Type": "application/pdf" },
       }).then(() => {
         setButtonStatus("success");
+        if (onDocumentUploaded) onDocumentUploaded();
       });
     });
   };

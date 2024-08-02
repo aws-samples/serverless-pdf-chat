@@ -46,7 +46,7 @@ const DocumentList: React.FC = () => {
               key={document.documentid}
               className="block p-6 bg-white border border-gray-200 rounded hover:bg-gray-100"
             >
-              <DocumentDetail {...document} />
+              <DocumentDetail document={document} onDocumentDeleted={fetchData}/>
             </Link>
           ))}
       </div>
