@@ -1,6 +1,6 @@
 import React, { useState, useEffect, KeyboardEvent } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { API } from "aws-amplify";
+import { get, post } from "aws-amplify/api";
 import { Conversation } from "../common/types";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatMessages from "../components/ChatMessages";
@@ -20,11 +20,11 @@ const Document: React.FC = () => {
 
   const fetchData = async (conversationid = params.conversationid) => {
     setLoading("loading");
-    const conversation = await API.get(
-      "serverless-pdf-chat",
-      `/doc/${params.documentid}/${conversationid}`,
-      {}
-    );
+    const response = await get({
+      apiName: "serverless-pdf-chat",
+      path: `/doc/${params.documentid}/${conversationid}`
+    }).response
+    const conversation = await response.body.json() as unknown as Conversation
     setConversation(conversation);
     setLoading("idle");
   };
@@ -39,11 +39,11 @@ const Document: React.FC = () => {
 
   const addConversation = async () => {
     setConversationListStatus("loading");
-    const newConversation = await API.post(
-      "serverless-pdf-chat",
-      `/doc/${params.documentid}`,
-      {}
-    );
+    const response = await post({
+      apiName: "serverless-pdf-chat",
+      path: `/doc/${params.documentid}`
+    }).response;
+    const newConversation = await response.body.json() as unknown as Conversation;
     fetchData(newConversation.conversationid);
     navigate(`/doc/${params.documentid}/${newConversation.conversationid}`);
     setConversationListStatus("idle");
@@ -80,21 +80,22 @@ const Document: React.FC = () => {
       };
 
       setConversation(updatedConversation);
-    }
 
-    await API.post(
-      "serverless-pdf-chat",
-      `/${conversation?.document.documentid}/${conversation?.conversationid}`,
-      {
-        body: {
-          fileName: conversation?.document.filename,
-          prompt: prompt,
-        },
-      }
-    );
-    setPrompt("");
-    fetchData(conversation?.conversationid);
-    setMessageStatus("idle");
+
+      await post({
+        apiName: "serverless-pdf-chat",
+        path: `/${conversation?.document.documentid}/${conversation?.conversationid}`,
+        options: {
+          body: {
+            fileName: conversation?.document.filename,
+            prompt: prompt,
+          }
+        }
+      }).response;
+      setPrompt("");
+      fetchData(conversation?.conversationid);
+      setMessageStatus("idle");
+    }
   };
 
   return (
