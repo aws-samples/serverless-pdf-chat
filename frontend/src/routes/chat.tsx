@@ -22,11 +22,12 @@ const Document: React.FC = () => {
     setLoading("loading");
     const response = await get({
       apiName: "serverless-pdf-chat",
-      path: `/doc/${params.documentid}/${conversationid}`
+      path: `doc/${params.documentid}/${conversationid}`
     }).response
     const conversation = await response.body.json() as unknown as Conversation
     setConversation(conversation);
     setLoading("idle");
+    console.log("Foo")
   };
 
   useEffect(() => {
@@ -41,7 +42,7 @@ const Document: React.FC = () => {
     setConversationListStatus("loading");
     const response = await post({
       apiName: "serverless-pdf-chat",
-      path: `/doc/${params.documentid}`
+      path: `doc/${params.documentid}`
     }).response;
     const newConversation = await response.body.json() as unknown as Conversation;
     fetchData(newConversation.conversationid);
@@ -84,7 +85,7 @@ const Document: React.FC = () => {
 
       await post({
         apiName: "serverless-pdf-chat",
-        path: `/${conversation?.document.documentid}/${conversation?.conversationid}`,
+        path: `${conversation?.document.documentid}/${conversation?.conversationid}`,
         options: {
           body: {
             fileName: conversation?.document.filename,

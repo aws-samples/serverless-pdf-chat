@@ -37,7 +37,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({onDocumentUploaded})
       setButtonStatus("uploading");
       const response = await get({
         apiName: "serverless-pdf-chat",
-        path: "/generate_presigned_url",
+        path: "generate_presigned_url",
         options: {
           headers: { "Content-Type": "application/json" },
           queryParams: {
