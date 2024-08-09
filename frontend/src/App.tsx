@@ -1,4 +1,5 @@
-import { Amplify, Auth } from "aws-amplify";
+import { Amplify } from "aws-amplify";
+import { fetchAuthSession } from "aws-amplify/auth";
 import { withAuthenticator } from "@aws-amplify/ui-react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./index.css";
@@ -8,29 +9,33 @@ import Chat from "./routes/chat";
 
 Amplify.configure({
   Auth: {
-    userPoolId: import.meta.env.VITE_USER_POOL_ID,
-    userPoolWebClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
-    region: import.meta.env.VITE_API_REGION,
+    Cognito: {
+      userPoolId: import.meta.env.VITE_USER_POOL_ID,
+      userPoolClientId: import.meta.env.VITE_USER_POOL_CLIENT_ID,
+    },
   },
   API: {
-    endpoints: [
-      {
-        name: "serverless-pdf-chat",
+    REST: {
+      "serverless-pdf-chat": {
         endpoint: import.meta.env.VITE_API_ENDPOINT,
         region: import.meta.env.VITE_API_REGION,
-        custom_header: async () => {
-          return {
-            Authorization: `Bearer ${(await Auth.currentSession())
-              .getIdToken()
-              .getJwtToken()}`,
-          };
-        },
       },
-    ],
-  },
+    },
+  }}, {
+  API: {
+    REST: {
+      headers: async () => {
+        const tokens = (await fetchAuthSession()).tokens;
+        const jwt = tokens?.idToken?.toString();
+          return {
+            "authorization": `Bearer ${jwt}`
+          };
+      }
+    }
+  }
 });
 
-let router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { API } from "aws-amplify";
+import { get } from "aws-amplify/api";
 import { Link } from "react-router-dom";
 import DocumentDetail from "./DocumentDetail";
 import { ArrowPathRoundedSquareIcon } from "@heroicons/react/24/outline";
@@ -12,9 +12,12 @@ const DocumentList: React.FC = () => {
 
   const fetchData = async () => {
     setListStatus("loading");
-    const documents = await API.get("serverless-pdf-chat", "/doc", {});
+    const response = await get({
+      apiName: "serverless-pdf-chat", path:"doc"
+    }).response;
+    const docs = await response.body.json() as unknown as Document[]
     setListStatus("idle");
-    setDocuments(documents);
+    setDocuments(docs);
   };
 
   useEffect(() => {

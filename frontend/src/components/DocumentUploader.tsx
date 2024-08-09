@@ -1,5 +1,5 @@
 import { ChangeEvent, useState, useEffect } from "react";
-import { API } from "aws-amplify";
+import { get } from "aws-amplify/api";
 import { filesize } from "filesize";
 import {
   DocumentIcon,
@@ -33,14 +33,20 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({onDocumentUploaded})
   };
 
   const uploadFile = async () => {
-    setButtonStatus("uploading");
-    await API.get("serverless-pdf-chat", "/generate_presigned_url", {
-      headers: { "Content-Type": "application/json" },
-      queryStringParameters: {
-        file_name: selectedFile?.name,
-      },
-    }).then((presigned_url) => {
-      fetch(presigned_url.presignedurl, {
+    if(selectedFile) {
+      setButtonStatus("uploading");
+      const response = await get({
+        apiName: "serverless-pdf-chat",
+        path: "generate_presigned_url",
+        options: {
+          headers: { "Content-Type": "application/json" },
+          queryParams: {
+            "file_name": selectedFile?.name
+          }
+        },
+      }).response
+      const presignedUrl = await response.body.json() as { presignedurl: string }
+      fetch(presignedUrl?.presignedurl, {
         method: "PUT",
         body: selectedFile,
         headers: { "Content-Type": "application/pdf" },
@@ -48,7 +54,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({onDocumentUploaded})
         setButtonStatus("success");
         if (onDocumentUploaded) onDocumentUploaded();
       });
-    });
+    }
   };
 
   const resetInput = () => {

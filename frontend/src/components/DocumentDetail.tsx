@@ -10,7 +10,7 @@ import {
   CogIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
-import {API} from "aws-amplify";
+import { del } from "aws-amplify/api";
 import {useNavigate} from "react-router-dom";
 import {useState} from "react";
 
@@ -26,11 +26,10 @@ const DocumentDetail: React.FC<DocumentDetailProps> = ({document, onDocumentDele
   const deleteDocument = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     setDeleteStatus("deleting");
-    await API.del(
-      "serverless-pdf-chat",
-      `doc/${document.documentid}`,
-      {}
-    );
+    await del({
+      apiName: "serverless-pdf-chat",
+      path: `doc/${document.documentid}`,
+    }).response;
     setDeleteStatus("idle");
     if (onDocumentDeleted) onDocumentDeleted(document);
     else navigate(`/`);
