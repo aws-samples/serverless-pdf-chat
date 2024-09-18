@@ -1,11 +1,12 @@
-import os, json
+import json
+import os
+
 import boto3
 from aws_lambda_powertools import Logger
 from langchain.indexes import VectorstoreIndexCreator
 from langchain_aws.embeddings import BedrockEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
-
 
 DOCUMENT_TABLE = os.environ["DOCUMENT_TABLE"]
 BUCKET = os.environ["BUCKET"]
@@ -41,13 +42,13 @@ def lambda_handler(event, context):
 
     bedrock_runtime = boto3.client(
         service_name="bedrock-runtime",
-        region_name="us-east-1",
+        region_name="eu-central-1",
     )
 
     embeddings = BedrockEmbeddings(
         model_id=EMBEDDING_MODEL_ID,
         client=bedrock_runtime,
-        region_name="us-east-1",
+        region_name="eu-central-1",
     )
 
     index_creator = VectorstoreIndexCreator(

@@ -58,7 +58,7 @@ By default, this application uses **Titan Embeddings G1 - Text** to generate emb
 
 > **Important -**
 > Before you can use these models with this application, **you must request access in the Amazon Bedrock console**. See the [Model access](https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html) section of the Bedrock User Guide for detailed instructions.
-> By default, this application is configured to use Amazon Bedrock in the `us-east-1` Region, make sure you request model access in that Region (this does not have to be the same Region that you deploy this stack to).
+> By default, this application is configured to use Amazon Bedrock in the `eu-central-1` Region, make sure you request model access in that Region (this does not have to be the same Region that you deploy this stack to).
 
 To select your Bedrock model, specify the `ModelId` parameter during the AWS SAM deployment, such as `anthropic.claude-3-sonnet-20240229-v1:0`. See [Amazon Bedrock model IDs](https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html) for a complete list.
 
@@ -133,7 +133,7 @@ Outputs
 -------------------------------------------------------------------------------
 Key                 CognitoUserPool
 Description         -
-Value               us-east-1_gxKtRocFs
+Value               eu-central-1_gxKtRocFs
 
 Key                 CognitoUserPoolClient
 Description         -
@@ -141,7 +141,7 @@ Value               874ghcej99f8iuo0lgdpbrmi76k
 
 Key                 ApiGatewayBaseUrl
 Description         -
-Value               https://abcd1234.execute-api.us-east-1.amazonaws.com/dev/
+Value               https://abcd1234.execute-api.eu-central-1.amazonaws.com/dev/
 -------------------------------------------------------------------------------
 ```
 
@@ -156,9 +156,9 @@ Create a file named `.env.development` in the `frontend` directory. [Vite will u
 Copy the following file content and replace the values with the outputs provided by AWS SAM:
 
 ```plaintext
-VITE_REGION=us-east-1
-VITE_API_ENDPOINT=https://abcd1234.execute-api.us-east-1.amazonaws.com/dev/
-VITE_USER_POOL_ID=us-east-1_gxKtRocFs
+VITE_REGION=eu-central-1
+VITE_API_ENDPOINT=https://abcd1234.execute-api.eu-central-1.amazonaws.com/dev/
+VITE_USER_POOL_ID=eu-central-1_gxKtRocFs
 VITE_USER_POOL_CLIENT_ID=874ghcej99f8iuo0lgdpbrmi76k
 ```
 

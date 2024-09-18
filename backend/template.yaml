@@ -7,7 +7,7 @@ Description: >
 
 Globals:
   Function:
-    Runtime: python3.11
+    Runtime: python3.10
     Handler: main.lambda_handler
     Architectures:
       - arm64
