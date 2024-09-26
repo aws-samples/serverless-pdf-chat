@@ -30,6 +30,9 @@ Parameters:
   ModelId:
     Default: "anthropic.claude-3-sonnet-20240229-v1:0"
     Type: String
+  EmbeddingModelId:
+    Default: "amazon.titan-embed-text-v2:0"
+    Type: String
 
 Conditions:
   DeployToAmplifyHosting: !Equals
@@ -303,11 +306,12 @@ Resources:
             - Sid: "BedrockScopedAccess"
               Effect: "Allow"
               Action: "bedrock:InvokeModel"
-              Resource: "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v1"
+              Resource: !Sub "arn:aws:bedrock:*::foundation-model/${EmbeddingModelId}"
       Environment:
         Variables:
           DOCUMENT_TABLE: !Ref DocumentTable
           BUCKET: !Ref DocumentBucket
+          EMBEDDING_MODEL_ID: !Ref EmbeddingModelId
       Events:
         EmbeddingQueueEvent:
           Type: SQS
@@ -332,12 +336,13 @@ Resources:
               Action: "bedrock:InvokeModel"
               Resource:
                 - !Sub "arn:aws:bedrock:*::foundation-model/${ModelId}"
-                - "arn:aws:bedrock:*::foundation-model/amazon.titan-embed-text-v1"
+                - !Sub "arn:aws:bedrock:*::foundation-model/${EmbeddingModelId}"
       Environment:
         Variables:
           MEMORY_TABLE: !Ref MemoryTable
           BUCKET: !Ref DocumentBucket
           MODEL_ID: !Ref ModelId
+          EMBEDDING_MODEL_ID: !Ref EmbeddingModelId
       Events:
         Root:
           Type: Api
@@ -345,6 +350,30 @@ Resources:
             RestApiId: !Ref Api
             Path: /{documentid}/{conversationid}
             Method: POST
+
+  DeleteDocumentFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/delete_document/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DocumentTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemoryTable
+        - S3CrudPolicy:
+            BucketName: !Sub "${AWS::StackName}-${AWS::Region}-${AWS::AccountId}*"
+      Environment:
+        Variables:
+          DOCUMENT_TABLE: !Ref DocumentTable
+          MEMORY_TABLE: !Ref MemoryTable
+          BUCKET: !Sub "${AWS::StackName}-${AWS::Region}-${AWS::AccountId}"
+      Events:
+        Root:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /doc/{documentid}
+            Method: DELETE
 
   AmplifyApp:
     Type: AWS::Amplify::App

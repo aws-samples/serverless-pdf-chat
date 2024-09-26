@@ -1,9 +1,7 @@
 boto3
 botocore
 faiss-cpu
-BeautifulSoup4
-langchain
-langchain-aws
-langchain-core
-langchain-community
+langchain==0.2.12
+langchain-community==0.2.10
+langchain-aws==0.1.13
 urllib3

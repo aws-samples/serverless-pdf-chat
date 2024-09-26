@@ -2,17 +2,18 @@ import os
 import json
 import boto3
 from aws_lambda_powertools import Logger
-from langchain_community.chat_models import BedrockChat
-from langchain.memory.chat_message_histories import DynamoDBChatMessageHistory
 from langchain.memory import ConversationBufferMemory
-from langchain.embeddings import BedrockEmbeddings
-from langchain.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
+from langchain_community.chat_message_histories import DynamoDBChatMessageHistory
+from langchain_community.vectorstores import FAISS
+from langchain_aws.chat_models import ChatBedrock
+from langchain_aws.embeddings import BedrockEmbeddings
 
 
 MEMORY_TABLE = os.environ["MEMORY_TABLE"]
 BUCKET = os.environ["BUCKET"]
 MODEL_ID = os.environ["MODEL_ID"]
+EMBEDDING_MODEL_ID = os.environ["EMBEDDING_MODEL_ID"]
 
 s3 = boto3.client("s3")
 logger = Logger()
@@ -25,7 +26,7 @@ def get_embeddings():
     )
 
     embeddings = BedrockEmbeddings(
-        model_id="amazon.titan-embed-text-v1",
+        model_id=EMBEDDING_MODEL_ID,
         client=bedrock_runtime,
         region_name="us-east-1",
     )
@@ -53,7 +54,7 @@ def create_memory(conversation_id):
 
 def bedrock_chain(faiss_index, memory, human_input, bedrock_runtime):
 
-    chat = BedrockChat(
+    chat = ChatBedrock(
         model_id=MODEL_ID,
         model_kwargs={'temperature': 0.0}
     )
