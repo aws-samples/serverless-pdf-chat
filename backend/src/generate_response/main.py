@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 
@@ -10,6 +11,8 @@ from langchain_aws.embeddings import BedrockEmbeddings
 from langchain_community.chat_message_histories import DynamoDBChatMessageHistory
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
+
+from backend.src.generate_response.text_to_speech import say_it
 
 MEMORY_TABLE = os.environ["MEMORY_TABLE"]
 BUCKET = os.environ["BUCKET"]
@@ -104,13 +107,24 @@ def lambda_handler(event, context):
         region_name="eu-central-1",
     )
 
-    response = bedrock_chain(faiss_index, memory, human_input, bedrock_runtime)
-    if response:
-        print(f"{MODEL_ID} -\nPrompt: {human_input}\n\nResponse: {response['answer']}")
+    llm_response = bedrock_chain(faiss_index, memory, human_input, bedrock_runtime)
+    if llm_response:
+        print(
+            f"{MODEL_ID} -\nPrompt: {human_input}\n\nResponse: {llm_response['answer']}"
+        )
     else:
         raise ValueError(f"Unsupported model ID: {MODEL_ID}")
 
-    logger.info(str(response["answer"]))
+    logger.info(str(llm_response["answer"]))
+
+    audio_stream, visemes = say_it(llm_response["answer"])
+
+    # Prepare the final HTTP response
+    response = {
+        "text": llm_response["answer"],
+        "audioStream": base64.b64encode(audio_stream.read()).decode("utf-8"),
+        "visemes": visemes,
+    }
 
     return {
         "statusCode": 200,
@@ -120,5 +134,5 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "*",
         },
-        "body": json.dumps(response["answer"]),
+        "body": json.dumps(response),
     }
