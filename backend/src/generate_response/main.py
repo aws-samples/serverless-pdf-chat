@@ -11,8 +11,7 @@ from langchain_aws.embeddings import BedrockEmbeddings
 from langchain_community.chat_message_histories import DynamoDBChatMessageHistory
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import PromptTemplate
-
-from backend.src.generate_response.text_to_speech import say_it
+from text_to_speech import say_it
 
 MEMORY_TABLE = os.environ["MEMORY_TABLE"]
 BUCKET = os.environ["BUCKET"]
