@@ -201,6 +201,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/upload_trigger/
+      Timeout: 30
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref DocumentTable
