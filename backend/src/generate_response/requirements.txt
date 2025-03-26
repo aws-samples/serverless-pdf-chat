@@ -1,7 +1,7 @@
 boto3
 botocore
-faiss-cpu
-langchain==0.2.12
-langchain-community==0.2.10
-langchain-aws==0.1.13
+faiss-cpu==1.7.4
+langchain==0.3.21
+langchain-community==0.3.20
+langchain-aws==0.2.17
 urllib3
