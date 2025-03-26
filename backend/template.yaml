@@ -16,7 +16,7 @@ Globals:
       Variables:
         LOG_LEVEL: INFO
     Layers:
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:51
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV3-python311-arm64:7
 
 Parameters:
   Frontend:
@@ -420,6 +420,7 @@ Resources:
       BranchName: main
       AppId: !GetAtt AmplifyApp.AppId
       EnableAutoBuild: true
+      Stage: PRODUCTION
 
 Outputs:
   CognitoUserPool:
