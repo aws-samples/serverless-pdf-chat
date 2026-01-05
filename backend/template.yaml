@@ -130,9 +130,13 @@ Resources:
     UpdateReplacePolicy: Delete
     Properties:
       KeySchema:
+        - AttributeName: userid
+          KeyType: HASH      
         - AttributeName: SessionId
-          KeyType: HASH
+          KeyType: RANGE
       AttributeDefinitions:
+        - AttributeName: userid
+          AttributeType: S
         - AttributeName: SessionId
           AttributeType: S
       BillingMode: PAY_PER_REQUEST

@@ -27,7 +27,7 @@ def lambda_handler(event, context):
     logger.info("Deleting DDB items")
     with memory_table.batch_writer() as batch:
         for item in document["conversations"]:
-            batch.delete_item(Key={"SessionId": item["conversationid"]})
+            batch.delete_item(Key={"userid": user_id, "SessionId": item["conversationid"]})
 
     document_table.delete_item(
         Key={"userid": user_id, "documentid": document_id}
