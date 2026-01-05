@@ -56,7 +56,7 @@ def lambda_handler(event, context):
 
     document_table.put_item(Item=document)
 
-    conversation = {"SessionId": conversation_id, "History": []}
+    conversation = {"userid": user_id, "SessionId": conversation_id, "History": []}
     memory_table.put_item(Item=conversation)
 
     message = {

@@ -40,7 +40,7 @@ def lambda_handler(event, context):
         ExpressionAttributeValues={":conversations": conversations},
     )
 
-    conversation = {"SessionId": conversation_id, "History": []}
+    conversation = {"userid": user_id, "SessionId": conversation_id, "History": []}
     memory_table.put_item(Item=conversation)
 
     return {

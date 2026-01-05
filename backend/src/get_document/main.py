@@ -29,7 +29,11 @@ def lambda_handler(event, context):
     )
     logger.info({"document": document})
 
-    response = memory_table.get_item(Key={"SessionId": conversation_id})
+    response = memory_table.get_item(Key={"userid": user_id, "SessionId": conversation_id})
+    if not "Item" in response:
+        return {
+            "statusCode": 403
+        }
     messages = response["Item"]["History"]
     logger.info({"messages": messages})
 
