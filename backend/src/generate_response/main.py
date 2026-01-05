@@ -38,9 +38,9 @@ def get_faiss_index(embeddings, user, file_name):
     faiss_index = FAISS.load_local("/tmp", embeddings, allow_dangerous_deserialization=True)
     return faiss_index
 
-def create_memory(conversation_id):
+def create_memory(user_id, conversation_id):
     message_history = DynamoDBChatMessageHistory(
-        table_name=MEMORY_TABLE, session_id=conversation_id
+        table_name=MEMORY_TABLE, session_id=conversation_id, key={"userid": user_id, "SessionId":conversation_id}
     )
 
     memory = ConversationBufferMemory(
@@ -81,7 +81,7 @@ def lambda_handler(event, context):
 
     embeddings = get_embeddings()
     faiss_index = get_faiss_index(embeddings, user, file_name)
-    memory = create_memory(conversation_id)
+    memory = create_memory(user, conversation_id)
     bedrock_runtime = boto3.client(
         service_name="bedrock-runtime",
         region_name="us-east-1",
