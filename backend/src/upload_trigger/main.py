@@ -1,7 +1,7 @@
 import os, json
 from datetime import datetime
 import boto3
-import PyPDF2
+from pypdf import PdfReader
 import shortuuid
 import urllib
 from aws_lambda_powertools import Logger
@@ -32,7 +32,7 @@ def lambda_handler(event, context):
     s3.download_file(BUCKET, key, f"/tmp/{file_name}")
 
     with open(f"/tmp/{file_name}", "rb") as f:
-        reader = PyPDF2.PdfReader(f)
+        reader = PdfReader(f)
         pages = str(len(reader.pages))
 
     conversation_id = shortuuid.uuid()
